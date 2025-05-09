@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <meta charset="UTF-8" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Bouncing Ball</title>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+
+        <style>
+
+            body {
+
+                margin: 0;
+
+                overflow: hidden;
+
+                background-color: #000000;
+
+            }
+
+ 
+
+            canvas {
+
+                display: block;
+
+            }
+
+        </style>
+
+    </head>
+
+ 
+
+    <body>
+
+        <script>
+
+            window.addEventListener('resize', () => {
+
+                window.location.reload();
+
+            });
+
+ 
+
+            function rnd(min, max) {
+
+                return Math.random() * (max - min) + min;
+
+            }
+
+ 
+
+            class Size {
+
+                constructor(width, height) {
+
+                    this.width = width;
+
+                    this.height = height;
+
+                    this.half = {
+
+                        width: width / 2,
+
+                        height: height / 2,
+
+                    };
+
+                }
+
+            }
+
+ 
+
+            const COLOR = {
+
+                background: '#000000',
+
+                wall: '#001f3f',
+
+                ball: '#ff9500',
+
+                jack: '#ff0000',
+
+            };
+
+ 
+
+            const DEVICE = new Size(window.innerWidth, window.innerHeight);
+
+ 
+
+            const CONST = {
+
+                ball: {
+
+                    radius: DEVICE.width * 0.05,
+
+                    restitution: 1,
+
+                    friction: 0,
+
+                    frictionAir: 0,
+
+                },
+
+                game: {
+
+                    maxBalls: 100,
+
+                    ballInterval: 2300,
+
+                },
+
+                wall: {
+
+                    vertical: new Size(
+
+                        DEVICE.width * 0.05,
+
+                        DEVICE.height * 1.5,
+
+                    ),
+
+                    horizontal: new Size(
+
+                        DEVICE.width, /////////////
+
+                        DEVICE.height * 0.25,
+
+                    ),
+
+                },
+
+            };
+
+ 
+
+            const GLOBAL = {
+
+                ballCount: 0,
+
+            };
+
+ 
+
+            const BODY = {
+
+                bottom: Matter.Bodies.rectangle(
+
+                    CONST.wall.horizontal.half.width,
+
+                    DEVICE.height - CONST.wall.horizontal.half.height,
+
+                    CONST.wall.horizontal.width,
+
+                    CONST.wall.horizontal.height,
+
+                    {
+
+                        isStatic: true,
+
+                        render: {
+
+                            fillStyle: COLOR.wall,
+
+                        },
+
+                    },
+
+                ),
+
+ 
+
+                top: Matter.Bodies.rectangle(
+
+                    CONST.wall.horizontal.half.width,
+
+                    CONST.wall.horizontal.half.height,
+
+                    CONST.wall.horizontal.width,
+
+                    CONST.wall.horizontal.height,
+
+                    {
+
+                        isStatic: true,
+
+                        render: {
+
+                            fillStyle: COLOR.wall,
+
+                        },
+
+                    },
+
+                ),
+
+ 
+
+                left: Matter.Bodies.rectangle(
+
+                    CONST.wall.vertical.half.width,
+
+                    DEVICE.height - CONST.wall.vertical.half.height,
+
+                    CONST.wall.vertical.width,
+
+                    CONST.wall.vertical.height,
+
+                    {
+
+                        isStatic: true,
+
+                        render: {
+
+                            fillStyle: COLOR.wall,
+
+                        },
+
+                    },
+
+                ),
+
+ 
+
+                right: Matter.Bodies.rectangle(
+
+                    DEVICE.width - CONST.wall.vertical.half.width,
+
+                    DEVICE.height - CONST.wall.vertical.half.height,
+
+                    CONST.wall.vertical.width,
+
+                    CONST.wall.vertical.height,
+
+                    {
+
+                        isStatic: true,
+
+                        render: {
+
+                            fillStyle: COLOR.wall,
+
+                        },
+
+                    },
+
+                ),
+
+            };
+
+ 
+
+            const ENGINE = Matter.Engine.create();
+
+            const WORLD = ENGINE.world;
+
+            const RENDER = Matter.Render.create({
+
+                element: document.body,
+
+                engine: ENGINE,
+
+                options: {
+
+                    width: DEVICE.width,
+
+                    height: DEVICE.height,
+
+                    wireframes: false,
+
+                    background: COLOR.background,
+
+                },
+
+            });
+
+ 
+
+            Matter.World.add(WORLD, Object.values(BODY));
+
+            Matter.Engine.run(ENGINE);
+
+            Matter.Render.run(RENDER);
+
+ 
+
+            Matter.Body.setPosition(BODY.top, {
+
+                x: BODY.top.position.x,
+
+                y: BODY.left.bounds.min.y - CONST.wall.horizontal.half.height,
+
+            });
+
+ 
+
+            setInterval(() => {
+
+                if (GLOBAL.ballCount >= CONST.game.maxBalls) {
+
+                    return;
+
+                }
+
+ 
+
+                GLOBAL.ballCount++;
+
+                console.log(GLOBAL.ballCount);
+
+ 
+
+                const ball = Matter.Bodies.circle(
+
+                    rnd(
+
+                        BODY.left.bounds.max.x + CONST.ball.radius,
+
+                        BODY.right.bounds.min.x - CONST.ball.radius,
+
+                    ),
+
+                    BODY.top.bounds.max.y + CONST.ball.radius,
+
+                    CONST.ball.radius,
+
+                    {
+
+                        restitution: CONST.ball.restitution,
+
+                        friction: CONST.ball.friction,
+
+                        frictionAir: CONST.ball.frictionAir,
+
+                        render: {
+
+                            fillStyle: COLOR.ball,
+
+                        },
+
+                    },
+
+                );
+
+ 
+
+                Matter.World.add(WORLD, ball);
+
+            }, CONST.game.ballInterval);
+
+        </script>
+
+    </body>
+
+</html>
+
+ 
+
+ 
+
